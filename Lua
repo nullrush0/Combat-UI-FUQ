@@ -1,0 +1,598 @@
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/cueshut/saves/main/criminality%20paste%20ui%20library'))()
+
+local window = library.new('Combat UI FUQ', 'NullRush')
+
+local tab = window.new_tab('rbxassetid://4483345998')
+
+local combatSection = tab.new_section('Combat')
+
+-- Left side toggles
+local togglesSector = combatSection.new_sector('Toggles', 'Left')
+
+local autofarmToggle = togglesSector.element('Toggle', 'AutoFarm', false, function(v)
+    print("AutoFarm toggled:", v.Toggle)
+    if v.Toggle then
+        local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function getNearestPlayer()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+    local localChar = LocalPlayer.Character
+    if not localChar then return nil end
+    local localRoot = localChar:FindFirstChild("HumanoidRootPart")
+    if not localRoot then return nil end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local targetRoot = player.Character.HumanoidRootPart
+            local dist = (localRoot.Position - targetRoot.Position).magnitude
+            if dist < shortestDistance then
+                shortestDistance = dist
+                nearestPlayer = player
+            end
+        end
+    end
+    return nearestPlayer
+end
+
+local function attachUnderground()
+    local localChar = LocalPlayer.Character
+    local localRoot = localChar and localChar:FindFirstChild("HumanoidRootPart")
+    if not localRoot then return end
+
+    local nearest = getNearestPlayer()
+    if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
+        local targetRoot = nearest.Character.HumanoidRootPart
+
+        RunService.Heartbeat:Connect(function()
+            if localRoot and targetRoot and localRoot.Parent and targetRoot.Parent then
+                -- 10 studs below their torso
+                local undergroundCFrame = targetRoot.CFrame * CFrame.new(0, -5, 0)
+                localRoot.CFrame = undergroundCFrame
+            end
+        end)
+    else
+        warn("No nearest player found!")
+    end
+end
+
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    attachUnderground()
+else
+    LocalPlayer.CharacterAdded:Connect(function()
+        wait(1)
+        attachUnderground()
+    end)
+end
+    else
+        -- add your autofarm OFF script here
+    end
+end)
+
+local camlockToggle = togglesSector.element('Toggle', 'CamLock', false, function(v)
+    print("CamLock toggled:", v.Toggle)
+    if v.Toggle then
+        local Camera = workspace.CurrentCamera
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local Holding = false
+
+_G.AimbotEnabled = true
+_G.TeamCheck = false -- If set to true then the script would only lock your aim at enemy team members.
+_G.AimPart = "Head" -- Where the aimbot script would lock at.
+_G.Sensitivity = 0 -- How many seconds it takes for the aimbot script to officially lock onto the target's aimpart.
+
+_G.CircleSides = 64 -- How many sides the FOV circle would have.
+_G.CircleColor = Color3.fromRGB(255, 255, 255) -- (RGB) Color that the FOV circle would appear as.
+_G.CircleTransparency = 0.7 -- Transparency of the circle.
+_G.CircleRadius = 80 -- The radius of the circle / FOV.
+_G.CircleFilled = false -- Determines whether or not the circle is filled.
+_G.CircleVisible = true -- Determines whether or not the circle is visible.
+_G.CircleThickness = 0 -- The thickness of the circle.
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+FOVCircle.Radius = _G.CircleRadius
+FOVCircle.Filled = _G.CircleFilled
+FOVCircle.Color = _G.CircleColor
+FOVCircle.Visible = _G.CircleVisible
+FOVCircle.Radius = _G.CircleRadius
+FOVCircle.Transparency = _G.CircleTransparency
+FOVCircle.NumSides = _G.CircleSides
+FOVCircle.Thickness = _G.CircleThickness
+
+local function GetClosestPlayer()
+	local MaximumDistance = _G.CircleRadius
+	local Target = nil
+
+	for _, v in next, Players:GetPlayers() do
+		if v.Name ~= LocalPlayer.Name then
+			if _G.TeamCheck == true then
+				if v.Team ~= LocalPlayer.Team then
+					if v.Character ~= nil then
+						if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
+							if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+								local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
+								local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+								
+								if VectorDistance < MaximumDistance then
+									Target = v
+								end
+							end
+						end
+					end
+				end
+			else
+				if v.Character ~= nil then
+					if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
+						if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+							local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
+							local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+							
+							if VectorDistance < MaximumDistance then
+								Target = v
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return Target
+end
+
+UserInputService.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Holding = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Holding = false
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+    FOVCircle.Radius = _G.CircleRadius
+    FOVCircle.Filled = _G.CircleFilled
+    FOVCircle.Color = _G.CircleColor
+    FOVCircle.Visible = _G.CircleVisible
+    FOVCircle.Radius = _G.CircleRadius
+    FOVCircle.Transparency = _G.CircleTransparency
+    FOVCircle.NumSides = _G.CircleSides
+    FOVCircle.Thickness = _G.CircleThickness
+
+    if Holding == true and _G.AimbotEnabled == true then
+        TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, GetClosestPlayer().Character[_G.AimPart].Position)}):Play()
+    end
+end)
+    else
+        -- add your camlock OFF script here
+    end
+end)
+
+local espToggle = togglesSector.element('Toggle', 'ESP', false, function(v)
+    print("ESP toggled:", v.Toggle)
+    if v.Toggle then
+        local p = game:GetService("Players")
+local lp = p.LocalPlayer
+local rs = game:GetService("RunService")
+for _, plr in pairs(p:GetPlayers()) do
+    if plr ~= lp then
+        local b = Drawing.new("Square")
+        b.Color = Color3.new(0, 0, 1)
+        b.Thickness = 1
+        b.Filled = false
+        local t = Drawing.new("Line")
+        t.Color = Color3.new(0, 0, 1)
+        t.Thickness = 1
+        rs.RenderStepped:Connect(function()
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local pos, on = workspace.CurrentCamera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+                if on then
+                    local h = plr.Character:FindFirstChild("Head")
+                    local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                    if h and hrp then
+                        local top = workspace.CurrentCamera:WorldToViewportPoint(h.Position + Vector3.new(0, 0.5, 0))
+                        local bot = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 2.5, 0))
+                        local sz = Vector2.new(math.abs(top.X - bot.X), math.abs(top.Y - bot.Y))
+                        b.Size = sz
+                        b.Position = Vector2.new(pos.X - sz.X/2, pos.Y - sz.Y/2)
+                        b.Visible = true
+                        t.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y)
+                        t.To = Vector2.new(pos.X, pos.Y)
+                        t.Visible = true
+                    end
+                else
+                    b.Visible = false
+                    t.Visible = false
+                end
+            else
+                b.Visible = false
+                t.Visible = false
+            end
+        end)
+    end
+end
+
+local espObjects = {}
+
+-- on ESP ON
+
+    end
+end)
+
+local walkSpeedToggle = togglesSector.element('Toggle', 'WalkSpeed', false, function(v)
+    print("WalkSpeed toggled:", v.Toggle)
+    local player = game.Players.LocalPlayer
+    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        if v.Toggle then
+            humanoid.WalkSpeed = 100 -- ON speed
+        else
+            humanoid.WalkSpeed = 16 -- default speed
+        end
+    end
+end)
+
+-- Right side buttons
+local buttonsSector = combatSection.new_sector('Buttons', 'Right')
+
+local autoDodgeButton = buttonsSector.element('Button', 'Auto Dodge', nil, function()
+    print("Auto Dodge Activated")
+    local animationId = 12342141464
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+local function freezeControls()
+	local scripts = player:FindFirstChild("PlayerScripts")
+	if scripts then
+		for _, s in ipairs(scripts:GetChildren()) do
+			if s:IsA("LocalScript") then
+				s.Disabled = true
+			end
+		end
+	end
+end
+
+local function unfreezeControls()
+	local scripts = player:FindFirstChild("PlayerScripts")
+	if scripts then
+		for _, s in ipairs(scripts:GetChildren()) do
+			if s:IsA("LocalScript") then
+				s.Disabled = false
+			end
+		end
+	end
+end
+
+local player = game.Players.LocalPlayer
+local Character = player.Character or player.CharacterAdded:Wait()
+local Humanoid_upvr = Character:WaitForChild("Humanoid")
+local uis = game:GetService("UserInputService")
+_G.DodgeRange = _G.DodgeRange or 15
+
+local dogw = false
+local gg_2 = nil
+local cdsfx = false
+
+local Dodge = Instance.new("Tool")
+Dodge.RequiresHandle = false
+Dodge.Name = "sense"
+
+Dodge.Activated:Connect(function()
+	if dogw == false then
+		dogw = true
+		print("ye")
+		local oldHealth = Humanoid_upvr.Health
+		gg_2 = Humanoid_upvr.HealthChanged:Connect(function(new)
+			if new < oldHealth and not cdsfx then
+				cdsfx = true
+
+				local sfx = Instance.new("Sound")
+				sfx.Parent = Character:WaitForChild("HumanoidRootPart")
+				sfx.Volume = 7
+				sfx.Name = "Miss"
+				sfx.SoundId = "rbxassetid://7816044544"
+				sfx:Play()
+
+				task.delay(1, function()
+					sfx:Destroy()
+				end)
+				task.delay(0.1, function()
+					cdsfx = false
+				end)
+
+				local currentPosition = Character.HumanoidRootPart.Position
+				local newPosition = Vector3.new(
+					currentPosition.X + math.random(-_G.DodgeRange, _G.DodgeRange),
+					currentPosition.Y,
+					currentPosition.Z + math.random(-_G.DodgeRange, _G.DodgeRange)
+				)
+				Character.HumanoidRootPart.CFrame = CFrame.new(newPosition, newPosition - Vector3.new(0,1,0))
+			end
+			oldHealth = new
+		end)
+	else
+		print("noo")
+		dogw = false
+		if gg_2 then
+			gg_2:Disconnect()
+			gg_2 = nil
+		end
+	end
+end)
+
+local Camera = workspace.CurrentCamera
+local SkyDriver = Instance.new("Tool")
+SkyDriver.RequiresHandle = false
+SkyDriver.Name = "power Jump"
+SkyDriver:SetAttribute("Regged", false)
+SkyDriver:SetAttribute("Skill", true)
+SkyDriver.ManualActivationOnly = false
+local skypower = 0
+
+uis.InputBegan:Connect(function(key, typing)
+	if typing then return end
+	if key.KeyCode == Enum.KeyCode.Five then
+		pcall(function()
+			local hrp = Character.HumanoidRootPart
+			local bg = hrp:FindFirstChildOfClass("BodyGyro")
+			local bv = hrp:FindFirstChildOfClass("BodyVelocity")
+			if bg then bg:Destroy() end
+			if bv then bv:Destroy() end
+		end)
+
+		local bodygyro = Instance.new("BodyGyro", Character.HumanoidRootPart)
+		bodygyro.Name = "Cammaaaaa"
+		bodygyro.D = 1000
+		bodygyro.P = 100000
+		bodygyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+		bodygyro.CFrame = Camera.CFrame
+
+		local bodyvelocity = Instance.new("BodyVelocity", Character.HumanoidRootPart)
+		bodyvelocity.Name = "FLYYYYY"
+		bodyvelocity.P = 2500
+		bodyvelocity.Velocity = Camera.CFrame.LookVector * (skypower / 2)
+		bodyvelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+
+		local flyer = Instance.new("Accessory")
+		flyer.Name = "Flying"
+		flyer.Parent = Character
+
+		-- Example animation handling (replace with your animation)
+		if tbl_upvr and tbl_upvr.Skyanim and tbl_upvr.Skyanim.Play then
+			tbl_upvr.Skyanim:AdjustWeight(1)
+			tbl_upvr.Skyanim:Play(0, 1, 0, 1)
+		end
+
+		wait(0.8)
+		skypower = skypower + 200
+
+		local render
+		render = game:GetService("RunService").RenderStepped:Connect(function()
+			bodygyro.CFrame = Camera.CFrame
+			bodyvelocity.Velocity = Camera.CFrame.LookVector * skypower
+		end)
+
+		wait(3.2)
+		skypower = skypower - 200
+		bodygyro:Destroy()
+		bodyvelocity:Destroy()
+		flyer:Destroy()
+		if render then render:Disconnect() end
+	end
+end)
+
+SkyDriver.Parent = player.Backpack
+Dodge.Parent = player.Backpack
+
+local blocking = false
+local holdingkeys = { w = false }
+
+uis.InputBegan:Connect(function(key, typing)
+	if typing then return end
+	if key.KeyCode == Enum.KeyCode.F then
+		blocking = true
+	end
+	if key.KeyCode == Enum.KeyCode.W then
+		holdingkeys.w = true
+	end
+end)
+
+uis.InputEnded:Connect(function(key, typing)
+	if typing then return end
+	if key.KeyCode == Enum.KeyCode.F then
+		blocking = false
+	end
+	if key.KeyCode == Enum.KeyCode.W then
+		holdingkeys.w = false
+	end
+end)
+
+
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+end)
+
+local infdashButton = buttonsSector.element('Button', 'INF Dashes', nil, function()
+     workspace:SetAttribute("EffectAffects", true)
+workspace:SetAttribute("NoDashCooldown", true)
+end)
+
+local runToolButton = buttonsSector.element('Button', 'Run Tool', nil, function()
+    print("Run Tool Activated")
+    local tool = Instance.new("Tool")
+    tool.Name = "run like a dog"
+
+    tool.Parent = game.Players.LocalPlayer.Backpack
+    tool.RequiresHandle = false
+
+    local moving = false
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
+    local runService = game:GetService("RunService")
+    local movementSpeed = 125
+
+    local animation = Instance.new("Animation")
+    animation.AnimationId = "rbxassetid://95575238948327" 
+    local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid:WaitForChild("Animator")
+    local animationTrack
+
+
+    local function moveForward()
+        while moving do
+            local forwardDirection = humanoidRootPart.CFrame.LookVector
+            humanoidRootPart.Velocity = forwardDirection * movementSpeed
+            runService.Stepped:Wait()
+        end
+    end
+
+    tool.Equipped:Connect(function()
+        moving = true
+        animationTrack = animator:LoadAnimation(animation)
+        animationTrack:Play()
+        moveForward()
+    end)
+
+    tool.Unequipped:Connect(function()
+        moving = false
+        if animationTrack then
+            animationTrack:Stop()
+        end
+    end)
+end)
+
+local tpToolButton = buttonsSector.element('Button', 'Tp Tool', nil, function()
+    print("Tp Tool Activated")
+    local tool = Instance.new("Tool")
+tool.RequiresHandle = false
+tool.Name = "Unyielding Ki-Sense"
+
+local teleportSound = Instance.new("Sound")
+teleportSound.SoundId = "rbxassetid://2642969814"
+teleportSound.Volume = 1
+teleportSound.Name = "TeleportSound"
+teleportSound.Parent = tool
+
+local teleportAnim = Instance.new("Animation")
+teleportAnim.AnimationId = "rbxassetid://15957361339"
+
+tool.Activated:Connect(function()
+    local char = player.Character
+    if not char then return end
+
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not rootPart then return end
+
+    local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+    local animTrack = animator:LoadAnimation(teleportAnim)
+    animTrack:Play()
+
+    teleportSound:Play()
+
+    wait(0.2)
+    local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
+    rootPart.CFrame = CFrame.new(pos)
+
+    local final1 = game.ReplicatedStorage.Resources.Meteor["ExploVar1"].Part.Attachment:Clone()
+    final1.Parent = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or rootPart
+    for _, child in ipairs(final1:GetChildren()) do
+        if child:IsA("ParticleEmitter") then
+            child.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))
+            child:Emit(2)
+        end
+    end
+end)
+
+tool.Parent = player:WaitForChild("Backpack")
+end)
+
+local directMoveButton = buttonsSector.element('Button', 'Direct Move', nil, function()
+    print("Direct Move Activated")
+    local player = game.Players.LocalPlayer
+
+local function getNearestPlayer()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestPlayer = otherPlayer
+            end
+        end
+    end
+
+    return nearestPlayer
+end
+
+if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+    warn("Character not loaded")
+    return
+end
+
+local nearestPlayer = getNearestPlayer()
+if not nearestPlayer or not nearestPlayer.Character or not nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    warn("No nearby player found")
+    return
+end
+
+local originalPos = player.Character.HumanoidRootPart.CFrame
+local targetHRP = nearestPlayer.Character.HumanoidRootPart
+local behindPos = targetHRP.CFrame * CFrame.new(0, 0, 5)
+
+player.Character:SetPrimaryPartCFrame(behindPos)
+
+local shoveTool = player.Backpack:FindFirstChild("Normal Punch") or player.Character:FindFirstChild("Normal Punch")
+
+if shoveTool and shoveTool:IsA("Tool") then
+    if shoveTool.Parent == player.Backpack then
+        shoveTool.Parent = player.Character
+        task.wait(0.1)
+    end
+    shoveTool:Activate()
+else
+    warn("Shove tool not found")
+end
+
+task.wait(1)
+player.Character:SetPrimaryPartCFrame(originalPos)
+
+end)
+
+local utilitySection = tab.new_section('Movesets')
+
+local miscSector = utilitySection.new_sector('Movesets', 'Left')
+
+miscSector.element('Button', 'Igris - Martial Arts', false, function(v)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/SlimJimShady/sungjin/refs/heads/main/Protected_7329509552810618.lua.txt"))()
+end)
+
+miscSector.element('Button', 'Jiren Moveset - guaro', false, function(v)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/sparksnaps/Jiren-Moveset-V2/refs/heads/main/Lua"))()
+end)
+
+
+miscSector.element('Button', 'Senior Gojo - Saitama', false, function(v)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kamyk-player/FinalSuperSenior/refs/heads/main/SaitamaToSuperSeniorGojo"))()
+end)
+
+
+miscSector.element('Button', 'JoJo - Gauro', false, function(v)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Medley-Taboritsky/RobloxScripting/refs/heads/main/DIO_Garou_TSB"))()
+end)
